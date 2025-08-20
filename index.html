@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz-spill</title>
+  <style>
+    :root{
+      --bg:#0f172a; /* mørk blå/sort */
+      --card:#111827; /* mørk grå */
+      --muted:#94a3b8; /* grå tekst */
+      --accent:#38bdf8; /* cyan */
+      --accent-2:#22c55e; /* grønn */
+      --accent-3:#f59e0b; /* oransje */
+      --accent-4:#ef4444; /* rød */
+      --white:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:linear-gradient(180deg,#0b1022,#0f172a 40%, #0b1022);
+      color:var(--white);
+      display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+    }
+    .card{
+      width:min(900px,100%); background:linear-gradient(180deg,#0f172a, #0b1022);
+      border:1px solid rgba(255,255,255,.08); border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    header{
+      padding:18px 22px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .logo{ font-weight:700; letter-spacing:.5px; }
+    .muted{ color:var(--muted); }
+
+    /* progress */
+    .progress-wrap{ padding:16px 22px; }
+    .progress{
+      height:12px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; position:relative;
+    }
+    .progress > .bar{
+      height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #60a5fa);
+      transition:width .35s ease; box-shadow:0 0 18px rgba(56,189,248,.5) inset;
+    }
+    .progress-label{ display:flex; justify-content:space-between; font-size:.9rem; margin-top:8px; color:var(--muted);}
+
+    main{ padding:24px 22px 28px; display:grid; gap:18px; }
+    .q-number{ font-size:1rem; color:var(--muted); }
+    .q-text{ font-size:1.35rem; line-height:1.35; }
+
+    .q-media{ display:flex; justify-content:center; }
+    .q-media img{ max-width:100%; max-height:340px; border-radius:14px; border:1px solid rgba(255,255,255,.1); }
+
+    .answers{ display:grid; gap:12px; grid-template-columns:1fr; }
+    .btn{
+      padding:14px 16px; background:#0b1224; border:1px solid rgba(255,255,255,.08); border-radius:12px; color:var(--white);
+      cursor:pointer; text-align:left; font-size:1rem; transition:transform .05s ease, border-color .2s ease, background .2s;
+    }
+    .btn:hover{ border-color:rgba(255,255,255,.22); transform:translateY(-1px); }
+    .btn[disabled]{ opacity:.6; cursor:not-allowed; }
+
+    .controls{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:6px; }
+    .pill{ font-size:.9rem; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.08); color:var(--muted); }
+    .next{ padding:12px 16px; border-radius:10px; background:var(--accent); border:none; color:#081018; font-weight:700; cursor:pointer; }
+    .next:disabled{ opacity:.6; cursor:not-allowed; }
+
+    /* result */
+    .result{
+      display:none; padding:28px; text-align:center; border-top:1px solid rgba(255,255,255,.08);
+    }
+    .result h2{ margin:0 0 10px; font-size:1.6rem; }
+    .result .big{ font-size:3rem; font-weight:800; letter-spacing:.5px; }
+    .tag{ display:inline-block; padding:6px 10px; border-radius:999px; margin-top:8px; font-size:.9rem; }
+
+    footer{ padding:16px 22px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; color:var(--muted); font-size:.9rem; }
+    a{ color:var(--accent); text-decoration:none }
+    @media (min-width:720px){
+      main{ grid-template-columns: 1.15fr 1fr; align-items:start; }
+      .q-media{ grid-column:2 }
+      .answers{ grid-column:1 }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="app">
+    <header>
+      <div class="logo">🧠 Quiz-spill</div>
+      <div class="muted">• Flervalg • Med bilder</div>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress" aria-label="Fremdrift"><div class="bar" id="progressBar"></div></div>
+      <div class="progress-label"><span id="progressText">0 / 0</span><span id="scoreText">Riktige: 0</span></div>
+    </div>
+
+    <main>
+      <div>
+        <div class="q-number" id="qNumber">Spørsmål 1</div>
+        <div class="q-text" id="qText">…</div>
+        <div class="answers" id="answers"></div>
+        <div class="controls">
+          <div class="pill" id="feedback">Velg et svar</div>
+          <button class="next" id="nextBtn" disabled>Neste ▶</button>
+        </div>
+      </div>
+      <div class="q-media" id="qMedia"></div>
+    </main>
+
+    <div class="result" id="result">
+      <div class="big" id="percent">0%</div>
+      <h2 id="message">—</h2>
+      <div class="muted" id="summary"></div>
+      <div style="margin-top:16px">
+        <button class="next" id="restartBtn">Spill igjen</button>
+      </div>
+    </div>
+
+    <footer>
+      <span class="muted">Lagret i én HTML-fil</span>
+      <span class="muted">Tips: legg bilder i <code>/images</code></span>
+    </footer>
+  </div>
+
+  <script>
+  // === 1) KONFIG: Legg til/endre spørsmål her ===
+  // Hvert spørsmål kan ha:
+  // - text: selve spørsmålet (streng)
+  // - image: valgfri bildebane (streng) – hvis satt, vises bildet ved siden av
+  // - answers: liste med svar-alternativer { text, correct }
+  const QUESTIONS = [
+    {
+      text: "Hva er hovedstaden i Norge?",
+      image: "", // ingen bilde
+      answers: [
+        { text: "Bergen", correct: false },
+        { text: "Oslo", correct: true },
+        { text: "Trondheim", correct: false },
+        { text: "Tromsø", correct: false },
+      ],
+    },
+    {
+      text: "Hvilket dyr ser du på bildet?",
+      image: "images/q-dyr-rev.jpg", // legg inn ditt bilde i /images
+      answers: [
+        { text: "Rev", correct: true },
+        { text: "Ulv", correct: false },
+        { text: "Grevling", correct: false },
+        { text: "Hare", correct: false },
+      ],
+    },
+    {
+      text: "Hvor mange minutter er det i én time?",
+      image: "",
+      answers: [
+        { text: "30", correct: false },
+        { text: "45", correct: false },
+        { text: "60", correct: true },
+        { text: "100", correct: false },
+      ],
+    },
+  ];
+
+  // === 2) LITT HJELPEKODE ===
+  const el = (sel) => document.querySelector(sel);
+  const progressBar = el('#progressBar');
+  const progressText = el('#progressText');
+  const scoreText = el('#scoreText');
+  const qNumber = el('#qNumber');
+  const qText = el('#qText');
+  const qMedia = el('#qMedia');
+  const answersWrap = el('#answers');
+  const feedback = el('#feedback');
+  const nextBtn = el('#nextBtn');
+  const resultBox = el('#result');
+  const percentEl = el('#percent');
+  const messageEl = el('#message');
+  const summaryEl = el('#summary');
+  const restartBtn = el('#restartBtn');
+
+  let idx = 0;            // hvilket spørsmål vi er på (0-basert)
+  let correctCount = 0;   // antall riktige så langt
+  let locked = false;     // om vi har valgt svar (låser knapper til neste)
+
+  function start(){
+    idx = 0; correctCount = 0; locked = false;
+    resultBox.style.display = 'none';
+    el('main').style.display = 'grid';
+    el('.progress-wrap').style.display = 'block';
+    updateProgress();
+    renderQuestion();
+  }
+
+  function updateProgress(){
+    const total = QUESTIONS.length;
+    const current = Math.min(idx, total);
+    const pct = Math.round((current/total)*100);
+    progressBar.style.width = pct + '%';
+    progressText.textContent = `${current} / ${total}`;
+    scoreText.textContent = `Riktige: ${correctCount}`;
+  }
+
+  function renderQuestion(){
+    const total = QUESTIONS.length;
+    if(idx >= total){
+      return showResult();
+    }
+    const q = QUESTIONS[idx];
+
+    qNumber.textContent = `Spørsmål ${idx+1}`;
+    qText.textContent = q.text;
+
+    // bilde (valgfritt)
+    qMedia.innerHTML = '';
+    if(q.image){
+      const img = document.createElement('img');
+      img.src = q.image; img.alt = 'Quiz-bilde';
+      qMedia.appendChild(img);
+    }
+
+    // svar-alternativer
+    answersWrap.innerHTML = '';
+    q.answers.forEach((opt, i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.textContent = opt.text;
+      btn.addEventListener('click', ()=> selectAnswer(btn, opt.correct));
+      answersWrap.appendChild(btn);
+    });
+
+    feedback.textContent = 'Velg et svar';
+    nextBtn.disabled = true;
+    locked = false;
+    updateProgress();
+  }
+
+  function selectAnswer(btn, isCorrect){
+    if(locked) return; // hindre flere klikk
+    locked = true;
+
+    // lås alle knapper
+    const buttons = answersWrap.querySelectorAll('button');
+    buttons.forEach(b => b.disabled = true);
+
+    // marker valgt + riktig/feil
+    if(isCorrect){
+      btn.style.borderColor = 'var(--accent-2)';
+      btn.style.background = 'rgba(34,197,94,.15)';
+      feedback.textContent = 'Riktig!';
+      correctCount++;
+    } else {
+      btn.style.borderColor = 'var(--accent-4)';
+      btn.style.background = 'rgba(239,68,68,.15)';
+      feedback.textContent = 'Feil svar';
+      // vis også hvilket som var riktig
+      buttons.forEach(b=>{
+        if(QUESTIONS[idx].answers.find(a=>a.text===b.textContent && a.correct)){
+          b.style.borderColor = 'var(--accent-2)';
+          b.style.background = 'rgba(34,197,94,.15)';
+        }
+      });
+    }
+
+    nextBtn.disabled = false;
+    updateProgress();
+  }
+
+  function next(){
+    idx++;
+    renderQuestion();
+  }
+
+  function showResult(){
+    const total = QUESTIONS.length;
+    const score = correctCount/total; // 0..1
+    const pct = Math.round(score*100);
+
+    let message = '';
+    let tagBg = '';
+    if(score >= 0.80){
+      message = 'WOW DU ER MESTER'; tagBg = 'var(--accent-2)';
+    } else if(score >= 0.60){
+      message = 'IKKE HELT ILLE'; tagBg = 'var(--accent)';
+    } else if(score >= 0.40){
+      message = 'OKEI'; tagBg = 'var(--accent-3)';
+    } else {
+      message = 'DU GJORDE ET FORSØK'; tagBg = 'var(--accent-4)';
+    }
+
+    el('main').style.display = 'none';
+    el('.progress-wrap').style.display = 'none';
+
+    percentEl.textContent = pct + '%';
+    messageEl.textContent = message;
+    summaryEl.innerHTML = `Du fikk <strong>${correctCount}</strong> av <strong>${total}</strong> riktige.`;
+
+    resultBox.style.display = 'block';
+  }
+
+  nextBtn.addEventListener('click', next);
+  restartBtn.addEventListener('click', start);
+
+  // start!
+  start();
+  </script>
+</body>
+</html>
