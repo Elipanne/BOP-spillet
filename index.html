@@ -129,6 +129,26 @@
   // - answers: liste med svar-alternativer { text, correct }
   const QUESTIONS = [
     {
+  text: "Hva vil det si å lydere?",
+  image: "",
+  answers: [
+    { text: "å si alle lydene i alfabetet i riktig rekkefølge", correct: false },
+    { text: "å si alle bokstavnanvene i alfabetet", correct: false },
+    { text: "å lese en og en bokstav i et ord høyt og så trekke dem sammen. Gggg-rrrr-iii-sss. det blir gris", correct: true },
+    { text: "å lage masse høye lyder", correct: false },
+  ],
+},
+    {
+  text: "Hvilken type språklig bevissthet øver man opp ved å lære seg å rime?",
+  image: "",
+  answers: [
+    { text: "ordbevissthet", correct: false },
+    { text: "morfologisk bevissthet", correct: false },
+    { text: "fonologisk bevissthet", correct: true },
+    { text: "ingen spesiell bevissthet", correct: false },
+  ],
+},
+    {
       text: "Hvilke av disse ordene er minimale par?",
       image: "", // ingen bilde
       answers: [
@@ -140,12 +160,22 @@
     },
     {
       text: "Hvilken skrivefase er denne tektsten i?",
-      image: "images/q-dyr-rev.jpg", // legg inn ditt bilde i /images
+      image: "images/bestefar.jpg", // legg inn ditt bilde i /images
       answers: [
-        { text: "Rev", correct: true },
-        { text: "Ulv", correct: false },
-        { text: "Grevling", correct: false },
-        { text: "Hare", correct: false },
+        { text: "fonologisk skrivefase", correct: true },
+        { text: "ortografisk skrivefase", correct: false },
+        { text: "logografisk skrivefase", correct: false },
+        { text: "pseudoskriving", correct: false },
+      ],
+    },
+    {
+      text: "Hvorfor har eleven skrevet FORDIG istedenfor FORDI i denne teksten?",
+      image: "images/minhobby.jpg", // legg inn ditt bilde i /images
+      answers: [
+        { text: "eleven har overgeneralisert stum g fra andre ord", correct: true },
+        { text: "eleven skriver sånn hun eller han hører ordet", correct: false },
+        { text: "eleven har dysleksi", correct: false },
+        { text: "eleven har slurva", correct: false },
       ],
     },
     {
