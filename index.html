@@ -286,6 +286,9 @@
   const summaryEl = el('#summary');
   const restartBtn = el('#restartBtn');
 
+  // Farger som brukes for å gi hvert spørsmål et eget uttrykk
+  const ACCENTS = ['#38bdf8', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
+
   let idx = 0;            // hvilket spørsmål vi er på (0-basert)
   let correctCount = 0;   // antall riktige så langt
   let locked = false;     // om vi har valgt svar (låser knapper til neste)
@@ -314,6 +317,11 @@
       return showResult();
     }
     const q = QUESTIONS[idx];
+
+    // Velg og bruk en farge for dette spørsmålet
+    const accent = ACCENTS[idx % ACCENTS.length];
+    document.documentElement.style.setProperty('--accent', accent);
+    document.body.style.background = `linear-gradient(180deg, ${accent}33, var(--bg) 40%, ${accent}33)`;
 
     qNumber.textContent = `Spørsmål ${idx+1}`;
     qText.textContent = q.text;
