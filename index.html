@@ -304,7 +304,7 @@
 
   function updateProgress(){
     const total = QUESTIONS.length;
-    the current = Math.min(idx, total);
+    const current = Math.min(idx, total);
     const pct = Math.round((current/total)*100);
     progressBar.style.width = pct + '%';
     progressText.textContent = `${current} / ${total}`;
